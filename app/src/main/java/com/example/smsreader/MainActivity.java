@@ -170,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
 
                     boolean credited = lowerCaseMsg.contains("credited") || lowerCaseMsg.contains("received") ;
 
-                    boolean debited = lowerCaseMsg.contains("debited") || lowerCaseMsg.contains("paid");
+                    boolean debited = lowerCaseMsg.contains("debited") || lowerCaseMsg.contains("paid")||lowerCaseMsg.contains("sent");
 
                     boolean pending = lowerCaseMsg.contains("pending")|| lowerCaseMsg.contains("due");
                      //boolean       |;

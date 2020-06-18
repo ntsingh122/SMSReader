@@ -1,15 +1,15 @@
 package com.example.smsreader;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.DatePickerDialog;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -32,6 +32,7 @@ import java.time.Period;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
 
 public class ExpenseActivity extends AppCompatActivity {
 
@@ -47,8 +48,7 @@ public class ExpenseActivity extends AppCompatActivity {
     PieChart pieChart;
     PieData pieData;
     PieDataSet pieDataSet;
-    ArrayList pieEntries;
-    ArrayList pieEntryLabels;
+    ArrayList<PieEntry> pieEntries;
     public   double expenseMonth;
     public   double incomeMonth;
     public   double expenseYear;
@@ -67,15 +67,15 @@ public class ExpenseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_expense);
         Bundle bundle = getIntent().getExtras();
-        mDisplayDateFrom = (TextView) findViewById(R.id.tvDateFrom);
-        mDisplayDateTo = (TextView) findViewById(R.id.tvDateTo);
-        findButton = (Button) findViewById(R.id.buttonFind);
+        mDisplayDateFrom = findViewById(R.id.tvDateFrom);
+        mDisplayDateTo = findViewById(R.id.tvDateTo);
+        findButton = findViewById(R.id.buttonFind);
         pieChart = findViewById(R.id.pieChart);
         monthListView = findViewById(R.id.monthList);
 
 
 
-        arr   = (Double[][][][]) bundle.getSerializable("array");
+        arr   = (Double[][][][]) Objects.requireNonNull(bundle).getSerializable("array");
 
         mDisplayDateFrom.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,7 +90,7 @@ public class ExpenseActivity extends AppCompatActivity {
                         android.R.style.Theme_Holo_Light_Dialog_MinWidth,
                         mDateSetListener1,
                         year,month,day);
-                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                 dialog.show();
             }
         });
@@ -118,7 +118,7 @@ public class ExpenseActivity extends AppCompatActivity {
                         android.R.style.Theme_Holo_Light_Dialog_MinWidth,
                         mDateSetListener2,
                         year,month,day);
-                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                Objects.requireNonNull(dialog.getWindow()).setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                 dialog.show();
             }
         });
@@ -170,7 +170,7 @@ public class ExpenseActivity extends AppCompatActivity {
         int month = Integer.parseInt(dateFrom.substring(5,7));
         int i=0;
         while (i < listd.size() && listd != null){
-            data ="Month : "+getMonthName(months.get(i))+"Income Amount : " +rs+listd.get(i) + "\nExpense Amount : "+rs+listi.get(i);
+            data ="Month : "+getMonthName(months.get(i)-2)+"\nExpense Amount : " +rs+listd.get(i) + "\nIncome Amount : "+rs+listi.get(i);
             stringList.add(data);
         i++;
         }
@@ -178,6 +178,7 @@ public class ExpenseActivity extends AppCompatActivity {
     }
 
     //@org.jetbrains.annotations.Contract(pure = true)
+    @RequiresApi(api = Build.VERSION_CODES.O)
     private   void calculate(Double arr[][][][], String dateFrom, String dateTo) {
 
         expenseMonth = incomeMonth = 0;
@@ -189,7 +190,7 @@ public class ExpenseActivity extends AppCompatActivity {
         yearNetList = new ArrayList<>();
         months = new ArrayList<>();
         int year, month, day, prevMonth, prevYear, i;
-        i = 0;
+        i = month =  0;
 
         LocalDate start = LocalDate.parse(dateFrom);
         LocalDate end = LocalDate.parse(dateTo);
@@ -211,9 +212,11 @@ public class ExpenseActivity extends AppCompatActivity {
             day = Integer.parseInt(date[2]);
             expenseMonth += arr[year][month][day][0];
             incomeMonth += arr[year][month][day][1];
-            months.add(month);
+
+
             if (prevMonth != month)//month end cod here
             {
+                months.add(month);
                 monthExpenseList.add(expenseMonth);
                 monthIncomeList.add(incomeMonth);
                 monthNetList.add(incomeMonth + expenseMonth);
@@ -247,6 +250,7 @@ public class ExpenseActivity extends AppCompatActivity {
         yearNetList.add(incomeYear + expenseYear);
         incomeYear = 0;
         expenseYear = 0;
+        months.add(month+1);
 
 
 
@@ -291,7 +295,7 @@ public class ExpenseActivity extends AppCompatActivity {
          value=value2=0f;
 
 
-        pieEntries = new ArrayList<>();
+        pieEntries = new ArrayList<PieEntry>();
         int i = 0;
         while (i < yearExpenseList.size()) {
              valueSingle= Float.parseFloat(String.valueOf(yearIncomeList.get(i)));
@@ -309,7 +313,9 @@ public class ExpenseActivity extends AppCompatActivity {
     }
 
     public   String getMonthName(int month) {
-        return new DateFormatSymbols().getMonths()[month-1]; // debug month name here
+        if(month==-1)
+            month =month +1;
+        return new DateFormatSymbols().getMonths()[month]; // debug month name here
     }
 
 
