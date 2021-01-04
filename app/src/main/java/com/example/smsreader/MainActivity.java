@@ -20,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import com.example.smsreader.adapter.MyAdapter;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
@@ -46,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private int i =0;
     public Double[][][][] dailyExpenseArray;
     private Button nextAct ;
-    FrameLayout progressBarHolder;
+    ProgressBar progressBarHolder;
     AlphaAnimation inAnimation;
     AlphaAnimation outAnimation;
     List<String>formattedMessages;
@@ -64,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
 
         readSmsButton = findViewById(R.id.button);
         nextAct = findViewById(R.id.next);
-        progressBarHolder = (FrameLayout) findViewById(R.id.progressBarHolder);
+        progressBarHolder = (ProgressBar) findViewById(R.id.progressBarHolder);
         recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
 
         // use this setting to
@@ -83,9 +84,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 new MyTask().execute();
-                processDone= true;
+
             }
         });
+
 
         nextAct.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,8 +100,12 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtras(bundle);
                 if(processDone)
                 startActivity(intent);
-                else
-                    Snackbar.make(v,"Please Load the Messages first!", Snackbar.LENGTH_LONG).show();
+                else {
+                    readSmsButton.setVisibility(View.VISIBLE);
+                    nextAct.setVisibility(View.INVISIBLE);
+                    Snackbar.make(v, "Please Load the Messages first!", Snackbar.LENGTH_LONG).show();
+
+                }
             }
         });
     }
@@ -113,7 +119,6 @@ public class MainActivity extends AppCompatActivity {
             readSmsButton.setEnabled(false);
             inAnimation = new AlphaAnimation(0f, 1f);
             inAnimation.setDuration(200);
-            progressBarHolder.setAnimation(inAnimation);
             progressBarHolder.setVisibility(View.VISIBLE);
         }
 
@@ -122,9 +127,11 @@ public class MainActivity extends AppCompatActivity {
             super.onPostExecute(aVoid);
             outAnimation = new AlphaAnimation(1f, 0f);
             outAnimation.setDuration(200);
-            progressBarHolder.setAnimation(outAnimation);
             progressBarHolder.setVisibility(View.GONE);
             readSmsButton.setEnabled(true);
+            processDone= true;
+            readSmsButton.setVisibility(View.INVISIBLE);
+            nextAct.setVisibility(View.VISIBLE);
             mAdapter.setValues(formattedMessages);
             mAdapter.notifyDataSetChanged();
 
@@ -212,8 +219,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void takeOutDetails() {
-        dailyExpenseArray = new Double[21][13][32][2];
-        for (int i=0 ;i<21 ;i++ ) {
+        dailyExpenseArray = new Double[22][13][32][2];
+        for (int i=0 ;i<22 ;i++ ) {
             for (int j=0;j<13 ;j++ ) {
                 for (int k=0;k<32;k++ ) {
 
